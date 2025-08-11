@@ -1,10 +1,12 @@
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
 from pocketbase import PocketBase
-import os
 from google.adk.tools import ToolContext
+from google.adk.agents.callback_context import CallbackContext
+from datetime import datetime
+import os
 
-pocketbase = PocketBase(os.getenv('POCKETBASE_URL'))
+pocketbase = PocketBase(os.environ.get('POCKETBASE_URL'))
 
 class ChatRequest(BaseModel):
     query: str
@@ -18,7 +20,7 @@ def create_ticket(
         description: str = "",
         tags: Optional[List[str]] = None,
         priority: Optional[str] = None,
-        customer_email: str = None,
+        customer_email: str = "",
         customer_name: Optional[str] = None,
         customer_phone: Optional[str] = None,
         ) -> Dict[str, Any]:
@@ -52,6 +54,14 @@ def create_ticket(
     if not customer_name:
         return {"error": "Customer name is required"}
     
+    tool_context.state.update(
+        {
+            "customer_email": customer_email,
+            "customer_name": customer_name,
+            "customer_phone": customer_phone,
+        }
+    )
+
     try:
         record = pocketbase.collection('tickets').create({
             "title": title,
@@ -72,3 +82,9 @@ def create_ticket(
         return {"error": "Failed to create ticket"}
     return {"success": "Ticket created successfully", "ticket_id": record.id}
 
+
+def before_agent_modifier(callback_context: CallbackContext) -> None:
+    callback_context.state["date"] = datetime.now().strftime("%Y-%m-%d")
+    callback_context.state["time"] = datetime.now().strftime("%I:%M:%S %p")
+    callback_context.state["day"] = datetime.now().strftime("%A")
+    return None

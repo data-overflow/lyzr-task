@@ -1,9 +1,6 @@
 ---
-description: schema of the pocketbase database
-globs:
-alwaysApply: false
+alwaysApply: true
 ---
-
 # **PocketBase Collections Documentation**
 
 ## **users**

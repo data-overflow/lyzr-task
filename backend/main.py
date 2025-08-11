@@ -8,15 +8,18 @@ from google.genai import types
 from pocketbase import PocketBase
 import os
 from datetime import datetime
+from dotenv import load_dotenv
 
-from utils import ChatRequest, create_ticket
+load_dotenv(override=True)
+
+from utils import ChatRequest, create_ticket, before_agent_modifier
 
 APPLICATION_NAME = 'chatbased'
 
 app = FastAPI(title=APPLICATION_NAME)
-session_service = DatabaseSessionService(os.getenv('DATABASE_URL'))
+session_service = DatabaseSessionService(os.environ.get('DATABASE_URL'))
 artifact_service = InMemoryArtifactService()
-pocketbase = PocketBase(os.getenv('POCKETBASE_URL'))
+pocketbase = PocketBase(os.environ.get('POCKETBASE_URL'))
 
 @app.get('/')
 async def root():
@@ -26,14 +29,16 @@ async def root():
 async def chat(request: ChatRequest):
     if request.session_id is not None:
         session = await session_service.get_session(
-            app_id=APPLICATION_NAME,
+            app_name=APPLICATION_NAME,
             user_id=request.organization_id,
             session_id=request.session_id
         )
-        if session is None:
+        if not session:
             print(f"Session {request.session_id} not found. Creating new session.")
             request.session_id = None
             request.reset = True
+        else:
+            print(f"Session {request.session_id} found. Using existing session.")
 
     if request.reset or request.session_id is None:
         session_state = {
@@ -47,30 +52,38 @@ async def chat(request: ChatRequest):
             "day": datetime.now().strftime("%A"),
         }
         session = await session_service.create_session(
-            app_id=APPLICATION_NAME,
+            app_name=APPLICATION_NAME,
             user_id=request.organization_id,
             state=session_state
         )
         pocketbase.collection('chat_sessions').create({
-            "session_id": session.id,
-            "organization_id": request.organization_id,
+            "sessionId": session.id,
+            "organizationId": request.organization_id,
         })
     
-    session_id = session.id
+    session_id = session.id or request.session_id
     organization = pocketbase.collection('organizations').get_one(request.organization_id)
     if organization is None:
         return {"error": "Organization not found"}
+    
     system_instruction = f"""
-    You are a support agent for {organization.name}.
-    {organization.systemInstruction}
-    {organization.additionalInstruction}
+    You are a support agent for {organization.name}. Your role is to help the customer with their issues
+    and answer any questions they have regarding the organization. Don't explicitly ask for the ticket details
+    that they might want to provide. Assume the appropriate ticket details such as the title, description, etc.
+    and don't mention these backend details to the customer. Get their details such as name, email & phone only
+    if they want to raise a ticket or address some issue and provided details for the same.
+
+    {organization.system_instruction}
+    {organization.additional_instruction}
+
     """ + "Current date is {date} in yyyy-mm-dd format and time is {time}. Today is {day}"
 
     agent = Agent(
         name=APPLICATION_NAME,
-        model=os.getenv('MODEL'),
+        model=os.environ.get('MODEL'),
         description="Support Agent",
         instruction=system_instruction,
+        before_agent_callback=before_agent_modifier,
         tools=[create_ticket]
     )
 
@@ -93,8 +106,9 @@ async def chat(request: ChatRequest):
 
     for event in events:
         if event.is_final_response():
-            final_response = event.message.content.parts[0].text
-        elif event.content and event.content.parts and event.content.parts[0].text and not event.is_final_response():
+            if event.content and event.content.parts and event.content.parts[0].text:
+                final_response = event.content.parts[0].text
+        elif event.content and event.content.parts and event.content.parts[0].text:
             thought_process.append(event.content.parts[0].text)
         if event.get_function_calls():
             for fc in event.get_function_calls():

@@ -1,8 +1,6 @@
 ---
-alwaysApply: false
-description: project overview
+alwaysApply: true
 ---
-
 Customer Support Chat Platform - Project Overview
 Project Description
 Build a plug-and-play customer support chat application that allows users to create AI-powered support agents and embed chat widgets on any website. The platform includes ticket management, user management, and agent optimization capabilities.
