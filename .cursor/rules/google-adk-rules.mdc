@@ -1,0 +1,235 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Google Agent Development Kit (ADK) Guidelines
+
+## Core Concepts
+
+- ADK is a flexible and modular framework for building and deploying AI agents.
+- It's designed to make agent development feel more like software development.
+- While optimized for Gemini and Google ecosystem, ADK is model-agnostic and deployment-agnostic.
+- ADK supports both standalone agents and complex multi-agent systems.
+- Agents can handle streaming responses and multi-modal inputs.
+
+## Agent Types
+
+### LLM Agents (LlmAgent, Agent)
+- Use for reasoning, generation, and dynamic tool use
+- Core engine is a Large Language Model (LLM)
+- Non-deterministic and flexible
+- Best for language tasks and dynamic decisions
+- Example: `from google.adk.agents import Agent, LlmAgent`
+
+### Workflow Agents
+- **SequentialAgent**: Executes agents in a predefined sequence
+- **ParallelAgent**: Runs multiple agents concurrently
+- **LoopAgent**: Repeats execution of an agent until a condition is met
+- Deterministic with predictable behavior
+- Best for structured processes and orchestration
+- Import: `from google.adk.agents import SequentialAgent, ParallelAgent, LoopAgent`
+
+### Custom Agents
+- Created by extending BaseAgent directly
+- Allows implementation of unique operational logic
+- Can be deterministic or non-deterministic based on implementation
+- Best for tailored requirements and specific workflows
+- Import: `from google.adk.agents import BaseAgent`
+
+## Agent Configuration Best Practices
+
+- Always provide clear names and descriptions for agents
+- Write specific, detailed instructions to guide agent behavior
+- For multi-agent systems, ensure descriptions clearly define each agent's responsibility
+- Set appropriate model parameters for your use case
+- Use system instructions for consistent agent behavior
+
+## Tool Integration
+
+- Equip agents with function tools by creating standard Python functions with proper type hints
+- Always include clear docstrings for your tools - ADK uses these to understand when to use the tool
+- Return tool results in consistent formats, preferably with status indicators
+- Use built-in tools for common operations like web search
+- Consider using MCP (Model Context Protocol) tools for enhanced capabilities
+- Import built-in tools: `from google.adk.tools import google_search, google_execute_code`
+
+## Multi-Agent Development
+
+- Use hierarchical structure with a root agent and sub-agents
+- Ensure clear, distinct descriptions for each agent to enable proper task routing
+- Use delegation patterns through agent transfers
+- Consider making specialized agents for different tasks
+- Example pattern:
+  ```python
+  root_agent = Agent(
+      name="coordinator",
+      model="gemini-2.0-flash",
+      description="Main agent that coordinates tasks",
+      sub_agents=[specialized_agent1, specialized_agent2]
+  )
+  ```
+
+## Sessions & Memory
+
+- Use sessions to maintain conversation state: `from google.adk import Session`
+- Store and retrieve data with memory: `from google.adk.memory import MemoryStore`
+- Implement structured memory for complex applications
+- Sessions can be serialized and deserialized for persistence
+- Example:
+  ```python
+  session = Session()
+  response = agent.run(inputs="Hello", session=session)
+  ```
+
+## Events & Callbacks
+
+- Register callbacks for monitoring agent execution
+- Use events to track agent progression: `from google.adk.events import Event, EventType`
+- Implement logging callbacks for debugging
+- Track conversation flow with event listeners
+- Example:
+  ```python
+  def on_event(event: Event) -> None:
+      if event.type == EventType.AGENT_RESPONDED:
+          print(f"Agent responded: {event.data}")
+  
+  agent.add_callback(on_event)
+  ```
+
+## Code Structure
+
+- Organize agents in modular files with clear responsibilities
+- Use environment variables for configuration via `.env` files
+- Follow standard Python practices: clear naming, proper typing, and comprehensive docstrings
+- Error handling should be robust both in agents and tools
+- Recommended project structure:
+  ```
+  my_agent/
+    ├── __init__.py
+    ├── agent.py       # Main agent definition
+    ├── tools.py       # Custom tools
+    ├── config.py      # Configuration
+    └── .env           # Environment variables
+  ```
+
+## Deployment Options
+
+- Test locally using the ADK CLI (`adk run`) or web UI (`adk web`)
+- Deploy to Vertex AI Agent Engine for managed, scalable infrastructure
+- Containerize with Docker for deployment to Cloud Run or GKE
+- Consider authentication requirements early in development
+- Command to run locally: `adk web` or `adk run my_agent`
+
+## Evaluation
+
+- Use ADK's built-in evaluation tools to test agent performance
+- Create comprehensive test cases for different execution paths
+- Evaluate both final response quality and step-by-step execution
+- Example:
+  ```python
+  from google.adk.evaluation import AgentEvaluator
+  
+  evaluator = AgentEvaluator(agent)
+  results = evaluator.evaluate("test_cases.json")
+  ```
+
+## Example Agent Structure
+
+```python
+from google.adk.agents import Agent
+from typing import Dict
+
+def my_tool(param: str) -> Dict[str, str]:
+    """Tool description that explains when and how to use this tool.
+    
+    Args:
+        param: Description of the parameter
+        
+    Returns:
+        Dict[str, str]: A dictionary with status and results
+    """
+    # Tool implementation
+    return {"status": "success", "result": f"Processed {param}"}
+
+my_agent = Agent(
+    name="my_helper_agent",
+    model="gemini-2.0-flash", # Or other supported models
+    description="Agent that helps with specific tasks",
+    instruction="""
+    You are a helpful assistant that provides information and assistance.
+    Always be polite and concise in your responses.
+    Use the my_tool function when the user asks for processing.
+    """,
+    tools=[my_tool]
+)
+```
+
+## Multi-Agent Example
+
+```python
+from google.adk.agents import Agent, SequentialAgent
+
+# Specialized agents
+greeting_agent = Agent(
+    model="gemini-2.0-flash",
+    name="greeting_agent",
+    description="Handles greetings and introductions",
+    instruction="You only handle greetings. Be friendly and welcoming."
+)
+
+task_agent = Agent(
+    model="gemini-2.0-flash",
+    name="task_agent",
+    description="Handles specific task requests",
+    instruction="You handle task-specific requests. Be efficient and practical.",
+    tools=[my_tool]
+)
+
+# Root agent with delegation
+root_agent = Agent(
+    name="coordinator_agent",
+    model="gemini-2.0-flash",
+    description="Coordinates between specialized agents",
+    instruction="""
+    You are the main coordinator. Delegate:
+    - Greetings to greeting_agent
+    - Task requests to task_agent
+    """,
+    sub_agents=[greeting_agent, task_agent]
+)
+
+# Sequential workflow
+workflow_agent = SequentialAgent(
+    name="workflow_agent",
+    description="Processes requests in a sequential workflow",
+    agents=[greeting_agent, task_agent]
+)
+```
+
+## Installation
+
+```
+pip install google-adk
+```
+
+Remember to set up authentication for Google Cloud when working with Vertex AI:
+```
+gcloud auth application-default login
+```
+
+## Environment Setup (.env)
+
+```
+# If using Gemini via Vertex AI on Google Cloud
+GOOGLE_CLOUD_PROJECT="your-project-id"
+GOOGLE_CLOUD_LOCATION="your-location" # e.g., us-central1
+GOOGLE_GENAI_USE_VERTEXAI="True"
+```
+
+---
+
+Refer Documentation from this link: https://google.github.io/adk-docs/
+And API Reference from here: https://google.github.io/adk-docs/api-reference/
+
+

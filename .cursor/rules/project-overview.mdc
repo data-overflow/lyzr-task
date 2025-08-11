@@ -1,0 +1,208 @@
+---
+alwaysApply: false
+---
+
+Customer Support Chat Platform - Project Overview
+Project Description
+Build a plug-and-play customer support chat application that allows users to create AI-powered support agents and embed chat widgets on any website. The platform includes ticket management, user management, and agent optimization capabilities.
+
+🏗️ Project Structure
+text
+customer-support-platform/
+├── frontend/                 # SvelteKit 5 application
+│   ├── src/
+│   │   ├── lib/
+│   │   ├── routes/
+│   │   ├── components/
+│   │   └── app.html
+│   ├── static/
+│   ├── package.json
+│   └── vite.config.js
+├── backend/                  # FastAPI application
+│   └── .env
+├── README.md
+└── .gitignore
+
+🚀 Technology Stack
+Frontend Technologies
+SvelteKit 5 (Latest Version)
+CRITICAL: Use the new runes syntax ($state, $derived, $effect)
+
+NO Legacy Syntax: Avoid $:, let:, or old reactive declarations
+
+Runes Examples:
+
+javascript
+// ✅ Correct (Runes syntax)
+let count = $state(0);
+let doubled = $derived(count * 2);
+
+$effect(() => {
+  console.log(`Count is ${count}`);
+});
+
+// ❌ Incorrect (Legacy syntax - DO NOT USE)
+let count = 0;
+$: doubled = count * 2;
+$: console.log(`Count is ${count}`);
+Tailwind CSS v4 (Latest Version)
+New Configuration: Uses @config directive in CSS files
+
+CSS-first configuration instead of tailwind.config.js
+
+Updated installation: @tailwindcss/vite plugin
+
+Example CSS configuration:
+
+css
+@import "tailwindcss";
+@config {
+  theme: {
+    colors: {
+      primary: "#3b82f6"
+    }
+  }
+}
+Shadcn-Svelte Components
+Use for consistent UI components (buttons, forms, modals)
+
+Install via: npx shadcn-svelte@latest init
+
+Components: Button, Input, Card, Dialog, Sheet, Table
+
+Font Awesome Icons
+Use @fortawesome/fontawesome-free for icons
+
+Import specific icons to optimize bundle size
+
+Backend Technologies
+FastAPI (Python)
+Python 3.11+ in virtual environment
+
+Async/await patterns throughout
+
+Pydantic v2 for data validation
+
+CORS enabled for iframe/widget embedding
+
+Google ADK (AI/ML)
+Google Generative AI (google-generativeai package)
+
+Gemini Pro model for chat responses
+
+Custom tools for ticket management integration
+
+PocketBase Database
+Real-time subscriptions for live updates
+
+File uploads for attachments
+
+Built-in authentication with custom roles
+
+🎯 Core Features & Requirements
+Authentication & User Management
+User registration/login with email
+
+Role-based access control (Customer, Agent, Admin)
+
+Team and department management
+
+Activity tracking and permissions
+
+Agent Management
+Create AI agents with custom personalities
+
+Configure system prompts and behavior
+
+Integrate with Google Generative AI
+
+Agent performance analytics
+
+Chat Widget System
+Iframe-based embedding for simplicity
+
+Customizable appearance (colors, position, branding)
+
+Real-time messaging with WebSocket fallback
+
+Session persistence across page reloads
+
+Ticket Management
+Auto-ticket creation from chat escalations
+
+Status workflow (Open → In Progress → Resolved → Closed)
+
+Priority levels and SLA tracking
+
+Assignment and routing to agents
+
+Full conversation history integration
+
+Widget Generation
+Dashboard for creating embed codes
+
+Live preview of widget appearance
+
+One-click copy-to-clipboard functionality
+
+Multiple embedding options (iframe + JavaScript)
+
+⚠️ Critical Implementation Notes
+SvelteKit 5 Specific
+ALWAYS use runes syntax - no legacy reactivity
+
+Use $effect instead of onMount for side effects
+
+Use $state for local component state
+
+Use $derived for computed values
+
+Tailwind v4 Specific
+Configure via CSS @config directive
+
+Use @tailwindcss/vite plugin
+
+Import classes may be different from v3
+
+FastAPI + Google AI
+Use async/await throughout
+
+Implement proper error handling for AI API calls
+
+Add request/response logging for debugging
+
+PocketBase Schema
+Define relations carefully for data integrity
+
+Use indexes on frequently queried fields
+
+Enable real-time subscriptions for live updates
+
+🎯 Success Criteria
+Functional Requirements
+
+Users can create and configure AI agents
+
+Customers can embed working chat widgets
+
+Tickets are created and managed effectively
+
+Real-time messaging works reliably
+
+Technical Requirements
+
+Clean, maintainable code following modern practices
+
+Proper error handling and loading states
+
+Responsive design with consistent UI
+
+Secure authentication and authorization
+
+Performance Requirements
+
+Chat responses under 2 seconds
+
+Widget loads in under 1 second
+
+Dashboard loads efficiently with pagination
