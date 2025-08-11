@@ -1,0 +1,105 @@
+---
+description: schema of the pocketbase database
+globs:
+alwaysApply: false
+---
+
+# **PocketBase Collections Documentation**
+
+## **users**
+- `id` - string - Auto-generated unique identifier
+- `email` - email - User email address (required, unique)
+- `password` - password - Encrypted password (hidden, min 8 chars)
+- `tokenKey` - string - Authentication token
+- `emailVisibility` - boolean - Email visibility setting
+- `verified` - boolean - Email verification status
+- `name` - text - User display name
+- `avatar` - file - Profile image (jpeg, png, svg, gif, webp)
+- `googleAvatar` - url - Google OAuth avatar URL
+- `currentOrganization` - relation - Current selected organization
+- `created` - date - Record creation date
+- `updated` - date - Last modification date
+
+## **organizations**
+- `id` - string - Auto-generated unique identifier
+- `name` - text - Internal agent name
+- `displayName` - text - Public-facing agent name
+- `createdBy` - relation - Organization creator (users)
+- `systemInstruction` - text - AI system prompt for agent behavior
+- `additionalInstruction` - text - Extra behavioral instructions
+- `inititialMessage` - text - First message shown to users
+- `suggestedMessages` - json - Quick reply options
+- `messagePlaceholder` - text - Input field placeholder text
+- `theme` - select - Widget theme (light/dark)
+- `primaryColor` - text - Main theme color (hex)
+- `backgroundColor` - text - Widget background color (hex)
+- `userMessageColor` - text - User message bubble color (hex)
+- `botMessageColor` - text - Bot message bubble color (hex)
+- `chatBubbleColor` - text - Chat button color (hex)
+- `chatBubbleAlign` - select - Chat button position (left_side/left_bottom/right_side/right_bottom)
+- `chatWidgetAlign` - select - Chat window alignment (left/right)
+- `profileIcon` - file - Bot avatar image
+- `chatBubbleIcon` - file - Chat button icon
+- `created` - date - Record creation date
+- `updated` - date - Last modification date
+
+## **customers**
+- `id` - string - Auto-generated unique identifier
+- `email` - email - Customer email address (optional)
+- `phoneNumber` - text - Customer phone number (optional)
+- `name` - text - Customer display name
+- `created` - date - Record creation date
+- `updated` - date - Last modification date
+
+## **chat_sessions**
+- `id` - string - Auto-generated unique identifier
+- `sessionId` - text - Unique session identifier (required)
+- `organizationId` - relation - Associated chat agent (organizations)
+- `customerId` - relation - Chat participant (customers)
+- `created` - date - Session start time
+- `updated` - date - Last activity time
+
+## **chat_messages**
+- `id` - string - Auto-generated unique identifier
+- `chatId` - relation - Associated chat session (chat_sessions)
+- `role` - select - Message sender type (user/assistant/model/system/tool)
+- `content` - text - Message text content
+- `metadata` - json - Additional message data
+- `created` - date - Message timestamp
+- `updated` - date - Last modification time
+
+## **tickets**
+- `id` - string - Auto-generated unique identifier
+- `title` - text - Ticket title (required)
+- `description` - editor - Detailed description (rich text)
+- `simpleId` - number - Human-readable ticket number (auto-increment)
+- `status` - select - Current ticket status (open/in_progress/pending/resolved/closed)
+- `priority` - select - Urgency level (low/medium/high/urgent)
+- `category` - text - Ticket category (free text)
+- `tags` - json - Categorization tags
+- `dueDate` - date - SLA deadline (optional)
+- `customerEmail` - email - Customer contact email
+- `customerInfo` - json - Additional customer data
+- `assignedTo` - relation - Assigned team members (users, multiple)
+- `organizationId` - relation - Source chat agent (organizations)
+- `created` - date - Ticket creation date
+- `updated` - date - Last modification date
+
+## **ticket_messages**
+- `id` - string - Auto-generated unique identifier
+- `ticketId` - relation - Associated ticket (tickets)
+- `role` - select - Sender type (admin/member/customer)
+- `content` - text - Message content
+- `metadata` - json - Attachments and additional data
+- `userId` - relation - Internal user sender (users, optional)
+- `customerId` - relation - External customer sender (customers, optional)
+- `created` - date - Message timestamp
+- `updated` - date - Last modification time
+
+## **organization_users**
+- `id` - string - Auto-generated unique identifier
+- `userId` - relation - Team member (users)
+- `organizationId` - relation - Organization/agent (organizations)
+- `role` - select - Member permissions (admin/member/guest)
+- `created` - date - Membership start date
+- `updated` - date - Last role change date
