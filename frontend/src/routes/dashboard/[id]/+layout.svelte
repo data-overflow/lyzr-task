@@ -57,16 +57,20 @@
 	<aside class="space-y-2 border-r p-4">
 		<div class="text-muted-foreground text-sm">Navigation</div>
 		<nav class="grid gap-1">
-			<a class="hover:bg-muted rounded px-2 py-1.5" href="./{currentOrg.value.id}/playground"
-				>Playground</a
+			<a
+				class="hover:bg-muted rounded px-2 py-1.5"
+				href="/dashboard/{currentOrg.value.id}/playground">Playground</a
 			>
-			<a class="hover:bg-muted rounded px-2 py-1.5" href="./{currentOrg.value.id}/tickets"
+			<a class="hover:bg-muted rounded px-2 py-1.5" href="/dashboard/{currentOrg.value.id}/tickets"
 				>Tickets</a
 			>
-			<a class="hover:bg-muted rounded px-2 py-1.5" href="./{currentOrg.value.id}/logs">Chat logs</a
+			<a class="hover:bg-muted rounded px-2 py-1.5" href="/dashboard/{currentOrg.value.id}/logs"
+				>Chat logs</a
 			>
-			<a class="hover:bg-muted rounded px-2 py-1.5" href="./{currentOrg.value.id}/deploy">Deploy</a>
-			<a class="hover:bg-muted rounded px-2 py-1.5" href="./{currentOrg.value.id}/settings"
+			<a class="hover:bg-muted rounded px-2 py-1.5" href="/dashboard/{currentOrg.value.id}/deploy"
+				>Deploy</a
+			>
+			<a class="hover:bg-muted rounded px-2 py-1.5" href="/dashboard/{currentOrg.value.id}/settings"
 				>Settings</a
 			>
 		</nav>

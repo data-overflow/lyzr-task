@@ -23,8 +23,8 @@
 		}
 	});
 
-	$inspect(pb.authStore);
-	$inspect(user.value);
+	// $inspect(pb.authStore);
+	// $inspect(user.value);
 
 	let { children } = $props();
 </script>

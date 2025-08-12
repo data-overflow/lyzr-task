@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from google.adk.agents import Agent
 from google.adk.sessions import DatabaseSessionService
@@ -20,6 +21,19 @@ app = FastAPI(title=APPLICATION_NAME)
 session_service = DatabaseSessionService(os.environ.get('DATABASE_URL'))
 artifact_service = InMemoryArtifactService()
 pocketbase = PocketBase(os.environ.get('POCKETBASE_URL'))
+
+origins = [
+    "http://localhost",
+    "http://localhost:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get('/')
 async def root():
@@ -120,6 +134,29 @@ async def chat(request: ChatRequest):
         "session_id": session_id,
         "organization_id": request.organization_id,
     }
+
+@app.get("/session/{organization_id}")
+async def get_session(organization_id: str):
+    session_state = {
+        "organization_id": organization_id,
+        "customer_id": None,
+        "customer_name": None,
+        "customer_email": None,
+        "customer_phone": None,
+        "date": datetime.now().strftime("%Y-%m-%d"),
+        "time": datetime.now().strftime("%I:%M:%S %p"),
+        "day": datetime.now().strftime("%A"),
+    }
+    session = await session_service.create_session(
+        app_name=APPLICATION_NAME,
+        user_id=organization_id,
+        state=session_state
+    )
+    pocketbase_session = pocketbase.collection('chat_sessions').create({
+        "sessionId": session.id,
+        "organizationId": organization_id,
+    })
+    return {"session_id": session.id, "pocketbase_session_id": pocketbase_session.id}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8002)

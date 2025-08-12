@@ -2,9 +2,34 @@
 
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+/* @custom-variant dark (&:is(.dark *)); */
 
-:root {
+@custom-variant dark (&:where(.dark &, &.dark, .mode-dark &, &.mode-dark));
+
+/* Islands: make subtrees actually inherit the right base props */
+.mode-light {
+    color-scheme: light;
+    color: var(--foreground);
+    background-color: var(
+        --background
+    ); /* remove if you don't want a filled bg */
+}
+.mode-dark {
+    color-scheme: dark;
+    color: var(--foreground);
+    background-color: var(--background);
+}
+
+
+
+/* PASTE/REPLACE WITH SHADCN THEME OUTPUT
+   Keep the selector aliases exactly as they are below.
+   - Replace the contents of :is(:root, .mode-light) with the generator’s :root block
+   - Replace the contents of :is(.dark, .mode-dark) with the generator’s .dark block
+*/
+
+
+:root, .force-light {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
@@ -71,6 +96,12 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+}
+
+.force-light {
+  color-scheme: light !important;
+  color: var(--foreground) !important;
+  background-color: var(--background) !important;
 }
 
 @theme inline {
