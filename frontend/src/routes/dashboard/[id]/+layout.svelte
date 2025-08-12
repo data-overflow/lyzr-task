@@ -147,7 +147,7 @@
 							<SidebarMenuButton asChild data-active={$page.url.pathname.includes('/playground')}>
 								<a
 									href="/dashboard/{currentOrg.value.id}/playground"
-									class="flex flex-row items-center gap-2 p-4"
+									class="flex w-full flex-row items-center gap-2 p-4"
 								>
 									<Home class="size-4" />
 									<span>Playground</span>
@@ -158,7 +158,7 @@
 							<SidebarMenuButton asChild data-active={$page.url.pathname.includes('/tickets')}>
 								<a
 									href="/dashboard/{currentOrg.value.id}/tickets"
-									class="flex flex-row items-center gap-2 p-4"
+									class="flex w-full flex-row items-center gap-2 p-4"
 								>
 									<Ticket class="size-4" />
 									<span>Tickets</span>
@@ -169,7 +169,7 @@
 							<SidebarMenuButton asChild data-active={$page.url.pathname.includes('/logs')}>
 								<a
 									href="/dashboard/{currentOrg.value.id}/logs"
-									class="flex flex-row items-center gap-2 p-4"
+									class="flex w-full flex-row items-center gap-2 p-4"
 								>
 									<MessageSquare class="size-4" />
 									<span>Chat Logs</span>
@@ -180,7 +180,7 @@
 							<SidebarMenuButton asChild data-active={$page.url.pathname.includes('/deploy')}>
 								<a
 									href="/dashboard/{currentOrg.value.id}/deploy"
-									class="flex flex-row items-center gap-2 p-4"
+									class="flex w-full flex-row items-center gap-2 p-4"
 								>
 									<Rocket class="size-4" />
 									<span>Deploy</span>
@@ -191,7 +191,7 @@
 							<SidebarMenuButton asChild data-active={$page.url.pathname.includes('/settings')}>
 								<a
 									href="/dashboard/{currentOrg.value.id}/settings"
-									class="flex flex-row items-center gap-2 p-4"
+									class="flex w-full flex-row items-center gap-2 p-4"
 								>
 									<Settings class="size-4" />
 									<span>Settings</span>

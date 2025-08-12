@@ -5,7 +5,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
+	import { CustomSelect } from '$lib/components/ui/custom-select';
 	import {
 		Card,
 		CardContent,
@@ -38,7 +38,7 @@
 		botMessageColor: '#f3f4f6',
 		chatBubbleColor: '#3b82f6',
 		chatBubbleAlign: 'right_bottom',
-		chatWidgetAlign: 'right'
+		chatWidgetAlign: 'right-align'
 	});
 
 	async function loadOrganization() {
@@ -87,7 +87,7 @@
 			botMessageColor: orgData.botMessageColor || '#f3f4f6',
 			chatBubbleColor: orgData.chatBubbleColor || '#3b82f6',
 			chatBubbleAlign: orgData.chatBubbleAlign || 'right_bottom',
-			chatWidgetAlign: orgData.chatWidgetAlign || 'right'
+			chatWidgetAlign: orgData.chatWidgetAlign || 'right-align'
 		};
 	}
 
@@ -330,15 +330,17 @@
 								<div class="grid grid-cols-2 gap-4">
 									<div class="space-y-2">
 										<Label for="chatWidgetAlign">Widget Alignment</Label>
-										<Select bind:value={formData.chatWidgetAlign}>
-											<SelectTrigger>
-												<span>{formData.chatWidgetAlign === 'left' ? 'Left' : 'Right'}</span>
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="left">Left</SelectItem>
-												<SelectItem value="right">Right</SelectItem>
-											</SelectContent>
-										</Select>
+										<CustomSelect
+											bind:value={formData.chatWidgetAlign}
+											options={[
+												{ id: 'left-align-opt', value: 'left', label: 'Left' },
+												{ id: 'right-align-opt', value: 'right', label: 'Right' }
+											]}
+											placeholder="Select alignment..."
+											onchange={(e) => {
+												formData.chatWidgetAlign = e.detail.value;
+											}}
+										/>
 									</div>
 									<!-- <div class="space-y-2">
 										<Label for="chatBubbleAlign">Bubble Position</Label>

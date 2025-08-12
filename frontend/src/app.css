@@ -101,7 +101,7 @@
 .force-light {
   color-scheme: light !important;
   color: var(--foreground) !important;
-  background-color: var(--background) !important;
+  /* background-color: var(--background) !important; */
 }
 
 @theme inline {

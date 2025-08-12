@@ -10,7 +10,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
+	import { CustomSelect } from '$lib/components/ui/custom-select';
 	import {
 		Card,
 		CardContent,
@@ -59,20 +59,38 @@
 	let editingTicket = $state(null);
 	let savingTicket = $state(false);
 
-	// Status and priority options
+	// Status and priority options with unique IDs to prevent duplicate keys
 	const statusOptions = [
-		{ value: 'open', label: 'Open', color: 'bg-blue-500', icon: AlertCircle },
-		{ value: 'in_progress', label: 'In Progress', color: 'bg-yellow-500', icon: Clock },
-		{ value: 'pending', label: 'Pending', color: 'bg-orange-500', icon: Pause },
-		{ value: 'resolved', label: 'Resolved', color: 'bg-green-500', icon: CheckCircle },
-		{ value: 'closed', label: 'Closed', color: 'bg-gray-500', icon: XCircle }
+		{ id: 'status-open', value: 'open', label: 'Open', color: 'bg-blue-500', icon: AlertCircle },
+		{
+			id: 'status-in-progress',
+			value: 'in_progress',
+			label: 'In Progress',
+			color: 'bg-yellow-500',
+			icon: Clock
+		},
+		{
+			id: 'status-pending',
+			value: 'pending',
+			label: 'Pending',
+			color: 'bg-orange-500',
+			icon: Pause
+		},
+		{
+			id: 'status-resolved',
+			value: 'resolved',
+			label: 'Resolved',
+			color: 'bg-green-500',
+			icon: CheckCircle
+		},
+		{ id: 'status-closed', value: 'closed', label: 'Closed', color: 'bg-gray-500', icon: XCircle }
 	];
 
 	const priorityOptions = [
-		{ value: 'low', label: 'Low', color: 'bg-gray-500' },
-		{ value: 'medium', label: 'Medium', color: 'bg-blue-500' },
-		{ value: 'high', label: 'High', color: 'bg-orange-500' },
-		{ value: 'urgent', label: 'Urgent', color: 'bg-red-500' }
+		{ id: 'priority-low', value: 'low', label: 'Low', color: 'bg-gray-500' },
+		{ id: 'priority-medium', value: 'medium', label: 'Medium', color: 'bg-blue-500' },
+		{ id: 'priority-high', value: 'high', label: 'High', color: 'bg-orange-500' },
+		{ id: 'priority-urgent', value: 'urgent', label: 'Urgent', color: 'bg-red-500' }
 	];
 
 	async function loadTickets() {
@@ -335,15 +353,18 @@
 		onOpenChange={(open) => {
 			if (!open) selectedTicket = null;
 		}}
+		class="min-w-[50vw] p-8"
 	>
-		<DialogContent class="max-h-[90vh] max-w-4xl overflow-hidden">
-			<DialogHeader>
+		<DialogContent class="max-h-[95vh] min-w-[50vw] max-w-6xl overflow-hidden p-8">
+			<DialogHeader class="pb-4">
 				<div class="flex items-start justify-between">
-					<div>
-						<DialogTitle class="text-xl"
+					<div class="flex-1 pr-4">
+						<DialogTitle class="text-xl font-semibold"
 							>#{selectedTicket.simpleId} - {selectedTicket.title}</DialogTitle
 						>
-						<DialogDescription class="mt-2">{selectedTicket.description}</DialogDescription>
+						<DialogDescription class="mt-2 text-sm leading-relaxed"
+							>{selectedTicket.description}</DialogDescription
+						>
 					</div>
 					<Button variant="outline" onclick={() => (editingTicket = { ...selectedTicket })}>
 						Edit Ticket
@@ -351,126 +372,145 @@
 				</div>
 			</DialogHeader>
 
-			<div class="grid h-[60vh] grid-cols-2 gap-6">
+			<div class="grid h-[65vh] grid-cols-1 gap-8 lg:grid-cols-2">
 				<!-- Ticket Details -->
-				<div class="space-y-4">
-					<div class="grid grid-cols-2 gap-4">
-						<div>
-							<Label class="text-sm font-medium">Status</Label>
-							{#if selectedTicket}
-								{@const statusConfig = getStatusConfig(selectedTicket.status)}
-								{@const IconComponent = statusConfig.icon}
-								<Badge class="{statusConfig.color} mt-1 text-white">
-									<IconComponent class="mr-1 size-3" />
-									{statusConfig.label}
-								</Badge>
+				<div class="space-y-6 overflow-y-auto pr-2">
+					<Card class="p-4">
+						<h3 class="mb-4 font-semibold">Ticket Information</h3>
+						<div class="space-y-4">
+							<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+								<div class="space-y-2">
+									<Label class="text-sm font-medium text-gray-700">Status</Label>
+									{#if selectedTicket}
+										{@const statusConfig = getStatusConfig(selectedTicket.status)}
+										{@const IconComponent = statusConfig.icon}
+										<div>
+											<Badge class="{statusConfig.color} text-white">
+												<IconComponent class="mr-1 size-3" />
+												{statusConfig.label}
+											</Badge>
+										</div>
+									{/if}
+								</div>
+								<div class="space-y-2">
+									<Label class="text-sm font-medium text-gray-700">Priority</Label>
+									{#if selectedTicket}
+										{@const priorityConfig = getPriorityConfig(selectedTicket.priority)}
+										<div>
+											<Badge class="{priorityConfig.color} text-white">{priorityConfig.label}</Badge
+											>
+										</div>
+									{/if}
+								</div>
+							</div>
+
+							<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+								<div class="space-y-2">
+									<Label class="text-sm font-medium text-gray-700">Customer Email</Label>
+									<p class="text-muted-foreground text-sm">
+										{selectedTicket.customerEmail || 'Not provided'}
+									</p>
+								</div>
+								<div class="space-y-2">
+									<Label class="text-sm font-medium text-gray-700">Due Date</Label>
+									<p class="text-muted-foreground text-sm">{formatDate(selectedTicket.dueDate)}</p>
+								</div>
+							</div>
+
+							{#if selectedTicket.category}
+								<div class="space-y-2">
+									<Label class="text-sm font-medium text-gray-700">Category</Label>
+									<div>
+										<Badge variant="outline">{selectedTicket.category}</Badge>
+									</div>
+								</div>
 							{/if}
-						</div>
-						<div>
-							<Label class="text-sm font-medium">Priority</Label>
-							{#if selectedTicket}
-								{@const priorityConfig = getPriorityConfig(selectedTicket.priority)}
-								<Badge class="{priorityConfig.color} mt-1 text-white">{priorityConfig.label}</Badge>
-							{/if}
-						</div>
-					</div>
 
-					<div class="grid grid-cols-2 gap-4">
-						<div>
-							<Label class="text-sm font-medium">Customer Email</Label>
-							<p class="text-muted-foreground text-sm">
-								{selectedTicket.customerEmail || 'Not provided'}
-							</p>
+							<div class="space-y-2">
+								<Label class="text-sm font-medium text-gray-700">Created</Label>
+								<p class="text-muted-foreground text-sm">{formatDate(selectedTicket.created)}</p>
+							</div>
 						</div>
-						<div>
-							<Label class="text-sm font-medium">Due Date</Label>
-							<p class="text-muted-foreground text-sm">{formatDate(selectedTicket.dueDate)}</p>
-						</div>
-					</div>
-
-					{#if selectedTicket.category}
-						<div>
-							<Label class="text-sm font-medium">Category</Label>
-							<Badge variant="outline" class="mt-1">{selectedTicket.category}</Badge>
-						</div>
-					{/if}
-
-					<div>
-						<Label class="text-sm font-medium">Created</Label>
-						<p class="text-muted-foreground text-sm">{formatDate(selectedTicket.created)}</p>
-					</div>
+					</Card>
 				</div>
 
 				<!-- Messages -->
 				<div class="flex flex-col">
-					<div class="mb-4 flex items-center gap-2">
-						<MessageSquare class="size-5" />
-						<h3 class="font-semibold">Messages</h3>
-					</div>
+					<Card class="flex h-full flex-col p-4">
+						<div class="mb-4 flex items-center gap-2">
+							<MessageSquare class="size-5" />
+							<h3 class="font-semibold">Messages</h3>
+						</div>
 
-					<ScrollArea class="flex-1 pr-4">
-						{#if loadingMessages}
-							<div class="flex items-center justify-center py-4">
-								<Loader2 class="size-4 animate-spin" />
-								<span class="ml-2 text-sm">Loading messages...</span>
-							</div>
-						{:else if ticketMessages.length === 0}
-							<div class="text-muted-foreground py-4 text-center text-sm">No messages yet</div>
-						{:else}
-							<div class="space-y-4">
-								{#each ticketMessages as message}
-									<div class="flex items-start gap-3">
-										<Avatar class="size-8">
-											<AvatarImage src={message.expand?.userId?.googleAvatar} />
-											<AvatarFallback>
-												{getInitials(
-													message.expand?.userId?.name ||
-														message.expand?.customerId?.name ||
-														message.role
-												)}
-											</AvatarFallback>
-										</Avatar>
-										<div class="flex-1 space-y-1">
-											<div class="flex items-center gap-2">
-												<span class="text-sm font-medium">
-													{message.expand?.userId?.name ||
-														message.expand?.customerId?.name ||
-														message.role}
-												</span>
-												<Badge
-													variant={message.role === 'admin' ? 'default' : 'secondary'}
-													class="text-xs"
-												>
-													{message.role}
-												</Badge>
-												<span class="text-muted-foreground text-xs">
-													{formatDate(message.created)}
-												</span>
-											</div>
-											<p class="text-sm">{message.content}</p>
-										</div>
-									</div>
-								{/each}
-							</div>
-						{/if}
-					</ScrollArea>
-
-					<!-- Message Input -->
-					<div class="mt-4 space-y-2">
-						<Textarea bind:value={newMessage} placeholder="Type your message..." rows={3} />
-						<Button
-							onclick={sendMessage}
-							disabled={sendingMessage || !newMessage.trim()}
-							class="w-full"
-						>
-							{#if sendingMessage}
-								<Loader2 class="mr-2 size-4 animate-spin" />
+						<ScrollArea class="flex-1 pr-2">
+							{#if loadingMessages}
+								<div class="flex items-center justify-center py-4">
+									<Loader2 class="size-4 animate-spin" />
+									<span class="ml-2 text-sm">Loading messages...</span>
+								</div>
+							{:else if ticketMessages.length === 0}
+								<div class="text-muted-foreground py-4 text-center text-sm">No messages yet</div>
 							{:else}
-								<Send class="mr-2 size-4" />
+								<div class="space-y-4">
+									{#each ticketMessages as message}
+										<div class="flex items-start gap-3">
+											<Avatar class="size-8">
+												<AvatarImage src={message.expand?.userId?.googleAvatar} />
+												<AvatarFallback>
+													{getInitials(
+														message.expand?.userId?.name ||
+															message.expand?.customerId?.name ||
+															message.role
+													)}
+												</AvatarFallback>
+											</Avatar>
+											<div class="flex-1 space-y-1">
+												<div class="flex items-center gap-2">
+													<span class="text-sm font-medium">
+														{message.expand?.userId?.name ||
+															message.expand?.customerId?.name ||
+															message.role}
+													</span>
+													<Badge
+														variant={message.role === 'admin' ? 'default' : 'secondary'}
+														class="text-xs"
+													>
+														{message.role}
+													</Badge>
+													<span class="text-muted-foreground text-xs">
+														{formatDate(message.created)}
+													</span>
+												</div>
+												<p class="text-sm">{message.content}</p>
+											</div>
+										</div>
+									{/each}
+								</div>
 							{/if}
-							Send Message
-						</Button>
-					</div>
+						</ScrollArea>
+
+						<!-- Message Input -->
+						<div class="mt-4 space-y-3 border-t pt-4">
+							<Textarea
+								bind:value={newMessage}
+								placeholder="Type your message..."
+								rows={3}
+								class="resize-none"
+							/>
+							<Button
+								onclick={sendMessage}
+								disabled={sendingMessage || !newMessage.trim()}
+								class="w-full"
+							>
+								{#if sendingMessage}
+									<Loader2 class="mr-2 size-4 animate-spin" />
+								{:else}
+									<Send class="mr-2 size-4" />
+								{/if}
+								Send Message
+							</Button>
+						</div>
+					</Card>
 				</div>
 			</div>
 		</DialogContent>
@@ -494,46 +534,26 @@
 			<div class="space-y-4">
 				<div class="space-y-2">
 					<Label for="status">Status</Label>
-					<Select bind:value={editingTicket.status}>
-						<SelectTrigger>
-							{#if editingTicket}
-								{@const statusConfig = getStatusConfig(editingTicket.status)}
-								{@const IconComponent = statusConfig.icon}
-								<span class="flex items-center gap-2">
-									<IconComponent class="size-4" />
-									{statusConfig.label}
-								</span>
-							{/if}
-						</SelectTrigger>
-						<SelectContent>
-							{#each statusOptions as status}
-								<SelectItem value={status.value}>
-									{@const IconComponent = status.icon}
-									<div class="flex items-center gap-2">
-										<IconComponent class="size-4" />
-										{status.label}
-									</div>
-								</SelectItem>
-							{/each}
-						</SelectContent>
-					</Select>
+					<CustomSelect
+						bind:value={editingTicket.status}
+						options={statusOptions}
+						placeholder="Select status..."
+						onchange={(e) => {
+							editingTicket.status = e.detail.value;
+						}}
+					/>
 				</div>
 
 				<div class="space-y-2">
 					<Label for="priority">Priority</Label>
-					<Select bind:value={editingTicket.priority}>
-						<SelectTrigger>
-							{#if editingTicket}
-								{@const priorityConfig = getPriorityConfig(editingTicket.priority)}
-								<span>{priorityConfig.label}</span>
-							{/if}
-						</SelectTrigger>
-						<SelectContent>
-							{#each priorityOptions as priority}
-								<SelectItem value={priority.value}>{priority.label}</SelectItem>
-							{/each}
-						</SelectContent>
-					</Select>
+					<CustomSelect
+						bind:value={editingTicket.priority}
+						options={priorityOptions}
+						placeholder="Select priority..."
+						onchange={(e) => {
+							editingTicket.priority = e.detail.value;
+						}}
+					/>
 				</div>
 
 				<div class="space-y-2">

@@ -1,5 +1,12 @@
 <script>
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+
 	let { id } = $props();
+
+	// onMount(() => {
+	// 	goto(`/dashboard/${id}/playground`);
+	// });
 </script>
 
 <div class="space-y-2">

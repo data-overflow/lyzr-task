@@ -24,3 +24,15 @@
 		<Button variant="outline" onclick={goToDashboard}>Explore dashboard</Button>
 	</div>
 </div>
+
+<iframe
+	src="/widget/govevo0dj41d735"
+	title="ChatBased Support"
+	loading="lazy"
+	width="100%"
+	style="position: fixed; bottom: 0; right: 0; border: none; z-index: 1000; min-height: 700px"
+	frameborder="0"
+></iframe>
+
+<!-- style="position:fixed;bottom:0;right:0;border:none;z-index:1000;height:auto;width:auto" -->
+<!-- style="position: fixed; bottom: 0; right: 0; border: none; z-index: 1000; height: auto; width: auto" -->

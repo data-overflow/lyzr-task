@@ -37,7 +37,7 @@
 	let botMsg = $derived(org?.botMessageColor || '#f3f4f6');
 	let bubbleColor = $derived(org?.chatBubbleColor || primary);
 	// screen anchoring of the widget container
-	let widgetAlign = $derived(org?.chatWidgetAlign || 'right');
+	let widgetAlign = $derived(org?.chatWidgetAlign === 'left-align' ? 'left' : 'right');
 	// bubble alignment relative to widget: 'bottom_right' (stacked) or 'bottom_side' (panel pops to side)
 	let bubbleAlign = $derived(org?.chatBubbleAlign || 'bottom_right');
 	let placeholder = $derived(org?.messagePlaceholder || 'Type your message...');
@@ -236,7 +236,7 @@
 			<!-- Chat Panel -->
 			{#if open}
 				<div
-					class="flex max-h-[440px] min-h-[360px] w-[min(92vw,28rem)] flex-col overflow-hidden rounded-xl border bg-white shadow-xl sm:max-h-[660px]"
+					class="flex max-h-[440px] min-h-[360px] w-[min(95vw,32rem)] flex-col overflow-hidden rounded-xl border bg-white shadow-xl sm:max-h-[660px] sm:w-[min(90vw,36rem)]"
 				>
 					<!-- Header -->
 					<div class="flex items-center gap-3 border-b px-4 py-3">
