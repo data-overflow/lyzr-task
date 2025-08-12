@@ -9,3 +9,39 @@
 		<div style="display: contents">%sveltekit.body%</div>
 	</body>
 </html>
+
+<!-- <script>
+	(function() {
+	  // Create iframe dynamically
+	  const iframe = document.createElement('iframe');
+	  iframe.src = 'http://localhost:5173/widget/4790x74u8l657nr';
+	  iframe.title = 'ChatBased Support';
+	  iframe.style.cssText = 'position:fixed;bottom:0;right:0;border:none;z-index:1000;min-height:700px;min-width:400px;background:transparent;pointer-events:none;';
+	  iframe.frameBorder = '0';
+	  iframe.setAttribute('allowtransparency', 'true');
+	  iframe.loading = 'lazy';
+	  
+	  // Start with pointer events disabled to allow clicks through
+	  iframe.style.pointerEvents = 'none';
+	  
+	  // Listen for messages from the widget to enable/disable pointer events
+	  window.addEventListener('message', function(event) {
+		if (event.origin !== 'http://localhost:5173') return;
+		
+		if (event.data.type === 'chatbot-open') {
+		  iframe.style.pointerEvents = 'auto';
+		} else if (event.data.type === 'chatbot-closed') {
+		  iframe.style.pointerEvents = 'none';
+		}
+	  });
+	  
+	  // Fallback: enable pointer events after load
+	  iframe.onload = function() {
+		setTimeout(function() {
+		  iframe.style.pointerEvents = 'auto';
+		}, 1000);
+	  };
+	  
+	  document.body.appendChild(iframe);
+	})();
+	</script> -->

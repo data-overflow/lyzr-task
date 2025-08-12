@@ -30,6 +30,10 @@
 	let sessionId = $state('');
 	let chatId = $state('');
 
+	// Refs for sizing reports to parent
+	let bubbleRef = $state(null);
+	let panelRef = $state(null);
+
 	// Derived theme values with sensible defaults (light-only)
 	let primary = $derived(org?.primaryColor || '#3b82f6');
 	let background = $derived(org?.backgroundColor || '#ffffff');
@@ -76,6 +80,27 @@
 		data?.id;
 		loadOrg();
 	});
+
+	function postParent(payload) {
+		try {
+			if (!browser) return;
+			if (typeof window !== 'undefined' && window.parent && window.parent !== window) {
+				window.parent.postMessage(payload, '*');
+			}
+		} catch {}
+	}
+
+	function sendWidgetState() {
+		const targetEl = open ? panelRef : bubbleRef;
+		let width = 0;
+		let height = 0;
+		try {
+			const rect = targetEl?.getBoundingClientRect?.();
+			width = rect?.width || 0;
+			height = rect?.height || 0;
+		} catch {}
+		postParent({ type: open ? 'chatbot-open' : 'chatbot-closed', open, width, height });
+	}
 
 	function alignBubbleClass() {
 		switch (bubbleAlign) {
@@ -132,8 +157,34 @@
 				// 		} catch {}
 				// 	}
 				// });
+				// Inform parent about potential size changes
+				try {
+					sendWidgetState();
+				} catch {}
 			});
 		}
+	});
+
+	// Report state when opened/closed
+	$effect(() => {
+		open;
+		queueMicrotask(() => {
+			try {
+				sendWidgetState();
+			} catch {}
+		});
+	});
+
+	// Report on resize
+	$effect(() => {
+		if (!browser) return;
+		const handler = () => {
+			try {
+				sendWidgetState();
+			} catch {}
+		};
+		window.addEventListener('resize', handler);
+		return () => window.removeEventListener('resize', handler);
 	});
 
 	function handleKeydown(ev) {
@@ -225,6 +276,7 @@
 				style="background: var(--chat-bubble); color: white;"
 				aria-label="Open chat"
 				onclick={() => (open = !open)}
+				bind:this={bubbleRef}
 			>
 				{#if chatBubbleIconUrl}
 					<img src={chatBubbleIconUrl} alt="chat" class="size-7" />
@@ -237,6 +289,7 @@
 			{#if open}
 				<div
 					class="flex max-h-[440px] min-h-[360px] w-[min(95vw,32rem)] flex-col overflow-hidden rounded-xl border bg-white shadow-xl sm:max-h-[660px] sm:w-[min(90vw,36rem)]"
+					bind:this={panelRef}
 				>
 					<!-- Header -->
 					<div class="flex items-center gap-3 border-b px-4 py-3">
