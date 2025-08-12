@@ -96,6 +96,7 @@ alwaysApply: true
 ## **organization_users**
 - `id` - string - Auto-generated unique identifier
 - `userId` - relation - Team member (users)
+- `userEmail` - email - Team member email that is added 
 - `organizationId` - relation - Organization/agent (organizations)
 - `role` - select - Member permissions (admin/member/guest)
 - `created` - date - Membership start date

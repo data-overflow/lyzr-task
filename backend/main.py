@@ -121,6 +121,5 @@ async def chat(request: ChatRequest):
         "organization_id": request.organization_id,
     }
 
-
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8002)
