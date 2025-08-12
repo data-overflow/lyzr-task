@@ -5,6 +5,7 @@
 	import { browser } from '$app/environment';
 	import { ModeWatcher } from 'mode-watcher';
 	import { pb, user } from '$lib/pocketbase.svelte.js';
+	import { Toaster } from '$lib/components/ui/sonner';
 	import { onMount } from 'svelte';
 
 	// if (browser) {
@@ -34,4 +35,5 @@
 </svelte:head>
 
 <ModeWatcher />
+<Toaster />
 {@render children?.()}

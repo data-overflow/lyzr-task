@@ -4,8 +4,37 @@
 	import { currentOrg } from '$lib/data.svelte.js';
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
-	// import { Toggle } from '$lib/components/ui/switch';
-	import { Sun, Moon } from '@lucide/svelte';
+	import {
+		Sidebar,
+		SidebarContent,
+		SidebarGroup,
+		SidebarGroupContent,
+		SidebarGroupLabel,
+		SidebarHeader,
+		SidebarMenu,
+		SidebarMenuItem,
+		SidebarMenuButton,
+		SidebarProvider,
+		SidebarInset,
+		SidebarTrigger
+	} from '$lib/components/ui/sidebar';
+	import {
+		DropdownMenu,
+		DropdownMenuContent,
+		DropdownMenuItem,
+		DropdownMenuTrigger
+	} from '$lib/components/ui/dropdown-menu';
+	import {
+		Sun,
+		Moon,
+		Home,
+		MessageSquare,
+		Ticket,
+		FileText,
+		Settings,
+		Rocket,
+		ChevronDown
+	} from '@lucide/svelte';
 	import { toggleMode } from 'mode-watcher';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
@@ -53,61 +82,108 @@
 	}
 </script>
 
-<div class="grid min-h-dvh grid-cols-[240px_1fr]">
-	<aside class="space-y-2 border-r p-4">
-		<div class="text-muted-foreground text-sm">Navigation</div>
-		<nav class="grid gap-1">
-			<a
-				class="hover:bg-muted rounded px-2 py-1.5"
-				href="/dashboard/{currentOrg.value.id}/playground">Playground</a
-			>
-			<a class="hover:bg-muted rounded px-2 py-1.5" href="/dashboard/{currentOrg.value.id}/tickets"
-				>Tickets</a
-			>
-			<a class="hover:bg-muted rounded px-2 py-1.5" href="/dashboard/{currentOrg.value.id}/logs"
-				>Chat logs</a
-			>
-			<a class="hover:bg-muted rounded px-2 py-1.5" href="/dashboard/{currentOrg.value.id}/deploy"
-				>Deploy</a
-			>
-			<a class="hover:bg-muted rounded px-2 py-1.5" href="/dashboard/{currentOrg.value.id}/settings"
-				>Settings</a
-			>
-		</nav>
-	</aside>
-	<div class="flex min-h-dvh flex-col">
-		<header class="flex h-14 items-center justify-between border-b px-4">
-			<div class="relative flex items-center gap-2">
-				<button class="font-semibold" onclick={() => (menuOpen = !menuOpen)}>
-					ChatBased / {org?.displayName || org?.name || '...'}
-				</button>
-				{#if menuOpen}
-					<div
-						class="bg-background absolute left-0 top-full z-10 mt-1 w-64 rounded-md border shadow"
-					>
-						<div class="text-muted-foreground p-2 text-xs">Organizations</div>
-						<ul class="max-h-60 overflow-auto">
+<SidebarProvider>
+	<Sidebar>
+		<SidebarHeader>
+			<SidebarMenu>
+				<SidebarMenuItem>
+					<DropdownMenu>
+						<DropdownMenuTrigger>
+							<SidebarMenuButton>
+								<span class="font-semibold">ChatBased</span>
+								<span class="text-muted-foreground">/ {org?.displayName || org?.name || '...'}</span
+								>
+								<ChevronDown class="ml-auto size-4" />
+							</SidebarMenuButton>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent class="w-64">
+							<div class="text-muted-foreground p-2 text-xs">Organizations</div>
 							{#each orgs as o}
-								<li>
-									<button
-										class="hover:bg-muted w-full px-3 py-2 text-left"
-										onclick={() => {
-											menuOpen = false;
-											goOrg(o.id);
-										}}
-									>
-										{o.displayName || o.name}
-									</button>
-								</li>
+								<DropdownMenuItem onclick={() => goOrg(o.id)}>
+									{o.displayName || o.name}
+								</DropdownMenuItem>
 							{/each}
-						</ul>
-						<div class="border-t p-2">
-							<a class="block rounded border px-2 py-1.5 text-center" href="/organizations"
-								>Create or manage</a
-							>
-						</div>
-					</div>
-				{/if}
+							<div class="mt-2 border-t pt-2">
+								<DropdownMenuItem>
+									<a href="/organizations" class="w-full">Create or manage</a>
+								</DropdownMenuItem>
+							</div>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				</SidebarMenuItem>
+			</SidebarMenu>
+		</SidebarHeader>
+
+		<SidebarContent>
+			<SidebarGroup>
+				<SidebarGroupLabel>Navigation</SidebarGroupLabel>
+				<SidebarGroupContent>
+					<SidebarMenu>
+						<SidebarMenuItem>
+							<SidebarMenuButton asChild data-active={$page.url.pathname.includes('/playground')}>
+								<a
+									href="/dashboard/{currentOrg.value.id}/playground"
+									class="flex flex-row items-center gap-2 p-4"
+								>
+									<Home class="size-4" />
+									<span>Playground</span>
+								</a>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+						<SidebarMenuItem>
+							<SidebarMenuButton asChild data-active={$page.url.pathname.includes('/tickets')}>
+								<a
+									href="/dashboard/{currentOrg.value.id}/tickets"
+									class="flex flex-row items-center gap-2 p-4"
+								>
+									<Ticket class="size-4" />
+									<span>Tickets</span>
+								</a>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+						<SidebarMenuItem>
+							<SidebarMenuButton asChild data-active={$page.url.pathname.includes('/logs')}>
+								<a
+									href="/dashboard/{currentOrg.value.id}/logs"
+									class="flex flex-row items-center gap-2 p-4"
+								>
+									<MessageSquare class="size-4" />
+									<span>Chat Logs</span>
+								</a>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+						<SidebarMenuItem>
+							<SidebarMenuButton asChild data-active={$page.url.pathname.includes('/deploy')}>
+								<a
+									href="/dashboard/{currentOrg.value.id}/deploy"
+									class="flex flex-row items-center gap-2 p-4"
+								>
+									<Rocket class="size-4" />
+									<span>Deploy</span>
+								</a>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+						<SidebarMenuItem>
+							<SidebarMenuButton asChild data-active={$page.url.pathname.includes('/settings')}>
+								<a
+									href="/dashboard/{currentOrg.value.id}/settings"
+									class="flex flex-row items-center gap-2 p-4"
+								>
+									<Settings class="size-4" />
+									<span>Settings</span>
+								</a>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+					</SidebarMenu>
+				</SidebarGroupContent>
+			</SidebarGroup>
+		</SidebarContent>
+	</Sidebar>
+
+	<SidebarInset>
+		<header class="flex h-14 items-center justify-between border-b px-4">
+			<div class="flex items-center gap-2">
+				<SidebarTrigger />
 			</div>
 
 			<div class="flex items-center gap-2">
@@ -118,7 +194,6 @@
 					onclick={() => toggleMode()}
 				>
 					<Sun class="size-4 dark:hidden" />
-
 					<Moon class="hidden size-4 dark:block" />
 				</Button>
 				{#if user.value}
@@ -136,5 +211,5 @@
 		<main class="flex-1 p-4">
 			{@render children()}
 		</main>
-	</div>
-</div>
+	</SidebarInset>
+</SidebarProvider>
