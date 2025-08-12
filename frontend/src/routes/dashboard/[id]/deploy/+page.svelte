@@ -159,7 +159,7 @@
 				</TabsList>
 
 				<TabsContent value="floating" class="space-y-3">
-					<div class="flex items-center gap-2 rounded-lg bg-blue-50 p-3 text-sm">
+					<div class="rounded-lgp-3 flex items-center gap-2 text-sm">
 						<AlertTriangle class="size-4 text-blue-600" />
 						<div>
 							<strong>Floating iframe:</strong> Simple iframe positioned in the corner. Always allows
@@ -169,7 +169,7 @@
 				</TabsContent>
 
 				<TabsContent value="script" class="space-y-3">
-					<div class="flex items-center gap-2 rounded-lg bg-green-50 p-3 text-sm">
+					<div class="flex items-center gap-2 rounded-lg p-3 text-sm">
 						<Check class="size-4 text-green-600" />
 						<div>
 							<strong>Smart script:</strong> Dynamically creates iframe with click-through behavior.
@@ -179,7 +179,7 @@
 				</TabsContent>
 
 				<TabsContent value="inline" class="space-y-3">
-					<div class="flex items-center gap-2 rounded-lg bg-orange-50 p-3 text-sm">
+					<div class="flex items-center gap-2 rounded-lg p-3 text-sm">
 						<AlertTriangle class="size-4 text-orange-600" />
 						<div>
 							<strong>Inline iframe:</strong> Embeds as a block element within your page content. Best
@@ -201,7 +201,7 @@
 				</Button>
 			</div>
 
-			<div class="rounded-lg border bg-gray-50 p-3">
+			<div class="rounded-lg border p-3">
 				<pre class="overflow-x-auto whitespace-pre-wrap text-xs leading-relaxed"><code
 						>{currentCode}</code
 					></pre>
