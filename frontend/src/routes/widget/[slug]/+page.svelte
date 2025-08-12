@@ -201,10 +201,10 @@
 
 <!-- Root container uses CSS variables for theming (Tailwind v4 arbitrary values) -->
 <div
-	class="scheme-light light force-light"
+	class="scheme-light light force-light bg-transparent"
 	style={`
         --primary: ${primary};
-        --bg: ${background};
+        
         --user-msg: ${userMsg};
         --bot-msg: ${botMsg};
         --chat-bubble: ${bubbleColor};
@@ -362,3 +362,10 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	:root {
+		--bg: transparent;
+		background: none transparent;
+	}
+</style>

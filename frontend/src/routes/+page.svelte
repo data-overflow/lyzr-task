@@ -3,8 +3,15 @@
 	import { login } from '$lib/pocketbase.svelte.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import ThemeButton from '$lib/themeButton.svelte';
+	import { pb } from '$lib/pocketbase.svelte.js';
+
 	function goToDashboard() {
-		goto('/organizations');
+		if (pb.authStore.isValid) {
+			goto('/dashboard');
+		} else {
+			login();
+		}
+		//goto('/organizations');
 	}
 </script>
 
@@ -26,12 +33,12 @@
 </div>
 
 <iframe
-	src="/widget/govevo0dj41d735"
+	src="/widget/4790x74u8l657nr"
 	title="ChatBased Support"
 	loading="lazy"
-	width="100%"
-	style="position: fixed; bottom: 0; right: 0; border: none; z-index: 1000; min-height: 700px"
+	style="position: fixed; bottom: 0; right: 0; border: none; z-index: 1000; min-height: 700px; min-width: 400px"
 	frameborder="0"
+	allowtransparency="true"
 ></iframe>
 
 <!-- style="position:fixed;bottom:0;right:0;border:none;z-index:1000;height:auto;width:auto" -->

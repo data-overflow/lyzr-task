@@ -88,6 +88,7 @@ async function updateDetailsFromGoogle(authData, meta) {
 
 export function logout() {
 	pb.authStore.clear();
+	user.set(null);
     try { localStorage.removeItem('user_google'); } catch {}
     goto('/', { replaceState: true });
 }
