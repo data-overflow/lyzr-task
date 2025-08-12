@@ -1,7 +1,7 @@
 <script>
 	import { page } from '$app/stores';
 	import { pb, user } from '$lib/pocketbase.svelte.js';
-	import { currentOrg } from '$lib/data.svelte.js';
+	import { currentOrg, organizationsStore } from '$lib/data.svelte.js';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Textarea } from '$lib/components/ui/textarea';
@@ -17,6 +17,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Loader2, Save, RefreshCw } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
+	import { onMount } from 'svelte';
 
 	let org = $state(null);
 	let loading = $state(true);
@@ -31,7 +32,6 @@
 		displayName: '',
 		inititialMessage: '',
 		messagePlaceholder: '',
-		theme: 'light',
 		primaryColor: '#3b82f6',
 		backgroundColor: '#ffffff',
 		userMessageColor: '#dbeafe',
@@ -44,26 +44,26 @@
 	async function loadOrganization() {
 		try {
 			loading = true;
-			const orgData = await pb.collection('organizations').getOne($page.params.id);
+			// Check cache first
+			const orgId = $page.params.id;
+			if (organizationsStore.value[orgId]) {
+				const orgData = organizationsStore.value[orgId];
+				org = orgData;
+				populateFormData(orgData);
+				loading = false;
+				return;
+			}
+
+			const orgData = await pb.collection('organizations').getOne(orgId);
 			org = orgData;
 
-			// Populate form with existing data
-			formData = {
-				systemInstruction: orgData.systemInstruction || '',
-				additionalInstruction: orgData.additionalInstruction || '',
-				displayName: orgData.displayName || '',
-				inititialMessage:
-					orgData.inititialMessage || "Hi! I'm your AI assistant. How can I help you today?",
-				messagePlaceholder: orgData.messagePlaceholder || 'Type your message...',
-				theme: orgData.theme || 'light',
-				primaryColor: orgData.primaryColor || '#3b82f6',
-				backgroundColor: orgData.backgroundColor || '#ffffff',
-				userMessageColor: orgData.userMessageColor || '#dbeafe',
-				botMessageColor: orgData.botMessageColor || '#f3f4f6',
-				chatBubbleColor: orgData.chatBubbleColor || '#3b82f6',
-				chatBubbleAlign: orgData.chatBubbleAlign || 'right_bottom',
-				chatWidgetAlign: orgData.chatWidgetAlign || 'right'
-			};
+			// Cache the organization
+			organizationsStore.set({
+				...organizationsStore.value,
+				[orgId]: orgData
+			});
+
+			populateFormData(orgData);
 		} catch (error) {
 			console.error('Failed to load organization:', error);
 			toast.error('Failed to load organization data');
@@ -72,17 +72,43 @@
 		}
 	}
 
+	function populateFormData(orgData) {
+		// Populate form with existing data
+		formData = {
+			systemInstruction: orgData.systemInstruction || '',
+			additionalInstruction: orgData.additionalInstruction || '',
+			displayName: orgData.displayName || '',
+			inititialMessage:
+				orgData.inititialMessage || "Hi! I'm your AI assistant. How can I help you today?",
+			messagePlaceholder: orgData.messagePlaceholder || 'Type your message...',
+			primaryColor: orgData.primaryColor || '#3b82f6',
+			backgroundColor: orgData.backgroundColor || '#ffffff',
+			userMessageColor: orgData.userMessageColor || '#dbeafe',
+			botMessageColor: orgData.botMessageColor || '#f3f4f6',
+			chatBubbleColor: orgData.chatBubbleColor || '#3b82f6',
+			chatBubbleAlign: orgData.chatBubbleAlign || 'right_bottom',
+			chatWidgetAlign: orgData.chatWidgetAlign || 'right'
+		};
+	}
+
 	async function saveChanges() {
 		try {
 			saving = true;
-			await pb.collection('organizations').update($page.params.id, formData);
+			const updatedOrg = await pb.collection('organizations').update($page.params.id, formData);
 			toast.success('Settings saved successfully!');
+
+			// Update cache with new data
+			organizationsStore.set({
+				...organizationsStore.value,
+				[$page.params.id]: updatedOrg
+			});
+
+			// Update current org state
+			org = updatedOrg;
+			currentOrg.set({ id: $page.params.id, record: updatedOrg });
 
 			// Refresh iframe
 			iframeKey += 1;
-
-			// Reload organization data
-			await loadOrganization();
 		} catch (error) {
 			console.error('Failed to save changes:', error);
 			toast.error('Failed to save changes');
@@ -91,8 +117,17 @@
 		}
 	}
 
+	// $effect(() => {
+	// 	if ($page.params.id) {
+	// 		loadOrganization();
+	// 	}
+	// });
+	onMount(() => {
+		loadOrganization();
+	});
+
 	$effect(() => {
-		if ($page.params.id) {
+		if ($page.params.id && $page.params.id !== currentOrg.value.id) {
 			loadOrganization();
 		}
 	});
@@ -305,7 +340,7 @@
 											</SelectContent>
 										</Select>
 									</div>
-									<div class="space-y-2">
+									<!-- <div class="space-y-2">
 										<Label for="chatBubbleAlign">Bubble Position</Label>
 										<Select bind:value={formData.chatBubbleAlign}>
 											<SelectTrigger>
@@ -326,24 +361,7 @@
 												<SelectItem value="right_bottom">Right Bottom</SelectItem>
 											</SelectContent>
 										</Select>
-									</div>
-								</div>
-							</div>
-
-							<!-- Theme Section -->
-							<div class="space-y-4">
-								<h4 class="text-sm font-medium">Theme</h4>
-								<div class="space-y-2">
-									<Label for="theme">Widget Theme</Label>
-									<Select bind:value={formData.theme}>
-										<SelectTrigger>
-											<span>{formData.theme === 'light' ? 'Light' : 'Dark'}</span>
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="light">Light</SelectItem>
-											<SelectItem value="dark">Dark</SelectItem>
-										</SelectContent>
-									</Select>
+									</div> -->
 								</div>
 							</div>
 						</CardContent>

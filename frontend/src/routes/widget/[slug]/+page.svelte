@@ -28,6 +28,7 @@
 	let text = $state('');
 	let thinking = $state(false);
 	let sessionId = $state('');
+	let chatId = $state('');
 
 	// Derived theme values with sensible defaults (light-only)
 	let primary = $derived(org?.primaryColor || '#3b82f6');
@@ -59,9 +60,9 @@
 			if (!data?.id) return;
 			const record = await pb.collection('organizations').getOne(data.id);
 			org = record;
-			// Initialize conversation with the org's initial message
-			messages = [{ role: 'assistant', content: initialMessage }];
 			await createSession();
+			// Initialize conversation with the org's initial message and log it
+			addAssistantMessage(initialMessage);
 		} catch (e) {
 			console.error('Failed to load organization', e);
 			error = 'Failed to load widget configuration.';
@@ -103,6 +104,7 @@
 			if (!res.ok) throw new Error(`Session failed (${res.status})`);
 			const json = await res.json();
 			sessionId = json.session_id || '';
+			chatId = json.pocketbase_session_id || chatId;
 		} catch (e) {
 			console.error('createSession error', e);
 			error = e?.message || 'Failed to create session';
@@ -141,12 +143,28 @@
 		}
 	}
 
+	async function logMessage(role, content) {
+		try {
+			if (!chatId || !content) return;
+			await pb.collection('chat_messages').create({
+				chatId,
+				role,
+				content,
+				metadata: {}
+			});
+		} catch (err) {
+			console.error('Failed to log message to PocketBase', err);
+		}
+	}
+
 	function addAssistantMessage(content) {
 		messages = [...messages, { role: 'assistant', content }];
+		logMessage('assistant', content);
 	}
 
 	function addUserMessage(content) {
 		messages = [...messages, { role: 'user', content }];
+		logMessage('user', content);
 	}
 
 	async function sendMessage() {
@@ -254,7 +272,8 @@
 									<AlertDialogCancel>Cancel</AlertDialogCancel>
 									<AlertDialogAction
 										onclick={() => {
-											messages = [{ role: 'assistant', content: initialMessage }];
+											messages = [];
+											addAssistantMessage(initialMessage);
 											open = false;
 										}}>Reset</AlertDialogAction
 									>

@@ -1,7 +1,7 @@
 <script>
 	import { theme, toggleTheme } from '$lib/data.svelte.js';
 	import { pb, user, logout } from '$lib/pocketbase.svelte.js';
-	import { currentOrg } from '$lib/data.svelte.js';
+	import { currentOrg, organizationsStore } from '$lib/data.svelte.js';
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import {
@@ -48,8 +48,22 @@
 		try {
 			console.log('data id', $page.params.id);
 			if (!$page.params.id) return;
-			org = await pb.collection('organizations').getOne($page.params.id);
-			currentOrg.set({ id: $page.params.id, record: org });
+
+			// Check cache first
+			const orgId = $page.params.id;
+			if (organizationsStore.value[orgId]) {
+				org = organizationsStore.value[orgId];
+				currentOrg.set({ id: orgId, record: org });
+			} else {
+				org = await pb.collection('organizations').getOne(orgId);
+				currentOrg.set({ id: orgId, record: org });
+				// Cache the organization
+				organizationsStore.set({
+					...organizationsStore.value,
+					[orgId]: org
+				});
+			}
+
 			orgs = await pb.collection('organizations').getFullList({
 				filter: `createdBy.id = "${pb.authStore.model?.id}"`,
 				sort: '-created'
@@ -60,8 +74,18 @@
 		}
 	}
 
+	// $effect(() => {
+	// 	if ($page.params.id) {
+	// 		loadOrg();
+	// 	}
+	// });
+
+	onMount(() => {
+		loadOrg();
+	});
+
 	$effect(() => {
-		if ($page.params.id) {
+		if ($page.params.id && $page.params.id !== currentOrg.value.id) {
 			loadOrg();
 		}
 	});
