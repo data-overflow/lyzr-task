@@ -4,10 +4,11 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import ThemeButton from '$lib/themeButton.svelte';
 	import { pb } from '$lib/pocketbase.svelte.js';
+	import { currentOrg } from '$lib/data.svelte';
 
 	function goToDashboard() {
-		if (pb.authStore.isValid) {
-			goto('/dashboard');
+		if (pb.authStore.isValid && currentOrg.value.id) {
+			goto('/dashboard/' + currentOrg.value.id);
 		} else {
 			login();
 		}
